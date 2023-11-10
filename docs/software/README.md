@@ -460,5 +460,522 @@ COMMIT;
 
 ```
 
-## RESTfull сервіс для управління даними
+## RESTfull сервіс для управління даними (Framework: ASP.NET WebAPI)
 
+Цей сервіс розроблений за допомогою Web API, впровадженим фреймворком платформи .NET - ASP.NET.
+Базується на базовій архітектурі MVC (Model-View-Controller), де
+- Model (Модель) - надає данні та реагує на команди контролера, змінюючи свій стан.
+- View (Вид) - відповідає за відображення даних для клієнта (в даному випадку - умовно, тому що це лише Web API).
+- Controller (Контролер) - інтерпретує дії користувача й сповіщає Моделі про необхідність змін станів.
+
+ASP.NET надає програмісту дуже зручний функціонал для реалізації веб-додатків і, в поєднанні з фреймворком EntityFramework та бібліотекою LINQ\
+(Language Integrated Query) розробник може легко взаємодіяти з базами даних без написання SQL-скриптів напряму.
+
+
+### Моделі
+
+#### Project
+```csharp
+using System.ComponentModel.DataAnnotations;
+
+namespace Duallo.Models;
+
+public class Project
+{
+    [Key] public int Id { get; set; }
+    [MaxLength(45)]public string Name { get; set; }
+    [MaxLength(180)]public string Description { get; set; }
+}
+```
+
+#### Team
+```csharp
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace Duallo.Models;
+
+public class Team
+{
+    [Key]public int Id { get; set; }
+    [MaxLength(100)]public string Name { get; set; }
+    [MaxLength(255)]public string Motto { get; set; }
+    public int ProjectId { get; set; }
+    [ForeignKey("ProjectId"), ValidateNever]public Project Project { get; set; }
+}
+```
+
+### Контролери
+
+#### ProjectController
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Duallo.Models;
+
+namespace Duallo.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProjectController : ControllerBase
+    {
+        private readonly ApplicationDbContext _context;
+
+        public ProjectController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Project>>> GetProjects() => _context.Projects is not null
+            ? await _context.Projects.ToListAsync()
+            : NotFound();
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Project>> GetProject(int id)
+        {
+            if (_context.Projects is null) return NotFound();
+            var project = await _context.Projects.FindAsync(id);
+
+            return project is not null ? project : NotFound();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutProject(int id, Project project)
+        {
+            if (id != project.Id) return BadRequest();
+            
+            _context.Entry(project).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProjectExists(id))
+                    return NotFound();
+                else
+                    throw;
+            }
+            return NoContent();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Project>> PostProject(Project project)
+        {
+            if (_context.Projects is null)
+                return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
+            
+            _context.Projects.Add(project);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetProject", new { id = project.Id }, project);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProject(int id)
+        {
+            if (_context.Projects is null) return NotFound();
+            
+            var project = await _context.Projects.FindAsync(id);
+            
+            if (project is null) return NotFound();
+            
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool ProjectExists(int id)
+        {
+            return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+    }
+}
+```
+#### TeamController
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Duallo.Models;
+
+namespace Duallo.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TeamController : ControllerBase
+    {
+        private readonly ApplicationDbContext _context;
+
+        public TeamController(ApplicationDbContext context) => _context = context;
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
+        {
+            return _context.Teams is not null
+                ? await _context.Teams.Include(c => c.Project).ToListAsync()
+                : NotFound();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Team>> GetTeam(int id)
+        {
+            if (_context.Teams is null) return NotFound();
+
+            var team = await _context.Teams
+                .Include(c => c.Project).FirstOrDefaultAsync(_ => _.Id == id);
+
+            return team is not null ? team : NotFound();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutTeam(int id, Team team)
+        {
+            if (id != team.Id) return BadRequest();
+            
+            _context.Entry(team).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TeamExists(id))
+                {
+                    return NotFound();
+                }
+            }
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Team>> PostTeam(Team team)
+        {
+            if (_context.Teams is null) return Problem("Entity set 'ApplicationDbContext.Teams'  is null.");
+            
+            _context.Teams.Add(team);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetTeam", new { id = team.Id }, team);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTeam(int id)
+        {
+            if (_context.Teams is null) return NotFound();
+            
+            var team = await _context.Teams.FindAsync(id);
+            if (team is null) return NotFound();
+            
+            _context.Teams.Remove(team);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool TeamExists(int id) => (_context.Teams?.Any(e => e.Id == id)).GetValueOrDefault();
+    }
+}
+```
+### Контекст Бази Даних
+Клас для створення таблиць у базі даних за допомогою фреймворку EntityFramework та початкового наповнення бази даних (Seed).
+
+#### ApplicationDbContext
+```csharp
+using Duallo.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Duallo;
+
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<Team> Teams { get; set; }
+
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Project>().HasData(
+            new Project { Id = 1, Name = "M4", Description = "Most powerful ARM-based chip" },
+            new Project { Id = 2, Name = "Google Pixel 9", Description = "The fastest growing smartphone on market" },
+            new Project
+            {
+                Id = 3, Name = "Drone delivery", Description = "The newest and the most convenient delivery ever"
+            });
+        modelBuilder.Entity<Team>().HasData(
+            new Team() { Id = 1, Name = "Apple's main Team", Motto = "Think different", ProjectId = 1 },
+            new Team() { Id = 2, Name = "Google's main Team", Motto = "Don't be evil", ProjectId = 2 },
+            new Team()
+            {
+                Id = 3, Name = "Amazon's main Team", Motto = "Work hard, Have fun, Make history", ProjectId = 3
+            }
+        );
+    }
+}
+```
+### Міграційні файли до Бази Даних (Entity Framework)
+
+#### Initial
+
+```csharp
+using Microsoft.EntityFrameworkCore.Migrations;
+using MySql.EntityFrameworkCore.Metadata;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace Duallo.Migrations
+{
+    /// <inheritdoc />
+    public partial class Initial : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Projects",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
+                    Description = table.Column<string>(type: "varchar(180)", maxLength: 180, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Projects", x => x.Id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Teams",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    Motto = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    ProjectId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Teams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Teams_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "Projects",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Most powerful ARM-based chip", "M4" },
+                    { 2, "The fastest growing smartphone on market", "Google Pixel 9" },
+                    { 3, "The newest and the most convenient delivery ever", "Drone delivery" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Teams",
+                columns: new[] { "Id", "Motto", "Name", "ProjectId" },
+                values: new object[,]
+                {
+                    { 1, "Think different", "Apple's main Team", 1 },
+                    { 2, "Don't be evil", "Google's main Team", 2 },
+                    { 3, "Work hard, Have fun, Make history", "Amazon's main Team", 3 }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teams_ProjectId",
+                table: "Teams",
+                column: "ProjectId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Teams");
+
+            migrationBuilder.DropTable(
+                name: "Projects");
+        }
+    }
+}
+```
+
+#### ApplicationDbContextModelSnapshot
+```csharp
+// <auto-generated />
+using Duallo;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Duallo.Migrations
+{
+    [DbContext(typeof(ApplicationDbContext))]
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation("ProductVersion", "7.0.13")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("Duallo.Models.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("varchar(180)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Projects");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Most powerful ARM-based chip",
+                            Name = "M4"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "The fastest growing smartphone on market",
+                            Name = "Google Pixel 9"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "The newest and the most convenient delivery ever",
+                            Name = "Drone delivery"
+                        });
+                });
+
+            modelBuilder.Entity("Duallo.Models.Team", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Motto")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Teams");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Motto = "Think different",
+                            Name = "Apple's main Team",
+                            ProjectId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Motto = "Don't be evil",
+                            Name = "Google's main Team",
+                            ProjectId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Motto = "Work hard, Have fun, Make history",
+                            Name = "Amazon's main Team",
+                            ProjectId = 3
+                        });
+                });
+
+            modelBuilder.Entity("Duallo.Models.Team", b =>
+                {
+                    b.HasOne("Duallo.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+```
+
+### Файл запуску програми 
+#### Program
+```csharp
+using Duallo;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySQL(
+    builder.Configuration.GetConnectionString("DefaultConnection")));
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+```
