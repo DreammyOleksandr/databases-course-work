@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "nM0sULElyFDf3hZ0vlIaNkZX5pH4QVm4Oc23RWP7n6uA6z3604vgJjVqn1cJNhilEPhePFWKF5hTCeaURHYMRA==",
+  "dgSpecHash": "PjkPpaWzV7KIOOVrGuOC0VhYnFee23/OZYdWkaDildlD8nznH0O0mddSom/5mBDr+zgtm1w6FOV3Tfkk3ovTmQ==",
   "success": true,
-  "projectFilePath": "/Users/bondarenkooleksandr/RiderProjects/databases-course-work/Duallo (Partial)/Duallo/Duallo/Duallo.csproj",
+  "projectFilePath": "/Users/bondarenkooleksandr/C#Projects/databases-course-work/src/Duallo/Duallo/Duallo.csproj",
   "expectedPackageFiles": [
     "/Users/bondarenkooleksandr/.nuget/packages/azure.core/1.25.0/azure.core.1.25.0.nupkg.sha512",
     "/Users/bondarenkooleksandr/.nuget/packages/azure.identity/1.7.0/azure.identity.1.7.0.nupkg.sha512",

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/bondarenkooleksandr/RiderProjects/databases-course-work/Duallo (Partial)/Duallo/Duallo/Duallo.csproj": {}
+    "/Users/bondarenkooleksandr/C#Projects/databases-course-work/src/Duallo/Duallo/Duallo.csproj": {}
   },
   "projects": {
-    "/Users/bondarenkooleksandr/RiderProjects/databases-course-work/Duallo (Partial)/Duallo/Duallo/Duallo.csproj": {
+    "/Users/bondarenkooleksandr/C#Projects/databases-course-work/src/Duallo/Duallo/Duallo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/bondarenkooleksandr/RiderProjects/databases-course-work/Duallo (Partial)/Duallo/Duallo/Duallo.csproj",
+        "projectUniqueName": "/Users/bondarenkooleksandr/C#Projects/databases-course-work/src/Duallo/Duallo/Duallo.csproj",
         "projectName": "Duallo",
-        "projectPath": "/Users/bondarenkooleksandr/RiderProjects/databases-course-work/Duallo (Partial)/Duallo/Duallo/Duallo.csproj",
+        "projectPath": "/Users/bondarenkooleksandr/C#Projects/databases-course-work/src/Duallo/Duallo/Duallo.csproj",
         "packagesPath": "/Users/bondarenkooleksandr/.nuget/packages/",
-        "outputPath": "/Users/bondarenkooleksandr/RiderProjects/databases-course-work/Duallo (Partial)/Duallo/Duallo/obj/",
+        "outputPath": "/Users/bondarenkooleksandr/C#Projects/databases-course-work/src/Duallo/Duallo/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/bondarenkooleksandr/.nuget/NuGet/NuGet.Config"
