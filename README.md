@@ -1,69 +1,38 @@
+# Duallo
 
-# Шаблон репозиторію для виконання лабораторних робіт з дисципліни "Організація баз даних"
+## Курсова робота з дисципліни "Організація баз даних" на тему "Система управління проєктами"
 
-## Як використовувати
+Це open-source репозиторій системи управління проєктами Duallo. Тут міститься основна інформація, яка допоможе
+ознайомитись із проєктом та надасть користувачу повну інформацію про майбутній досвід використання програми.
 
-В цьому репозиторії знаходиться шаблон для виконання лабораторних робіт.
+**Виконали:**
 
-Для виконання лабораторних робіт необхідно зробити ```fork``` цього репозіторію, склонувати вже власний репозіторій та розміщувати документацію у відповідних діректоріях ```./docs```.
+*студент 2-го курсу, групи ІМ-22*<span padding-right:5em></span> **Михайло БАЛАХОН
+** [Пошта: 9mohapx9@gmail.com, <a href="https://t.me/mibal_ua">Телеграм</a>]
 
-В цьому файлі необхідно вказати тему лабораторних робіт (назву проекту). Коротку загальну характеристику
-проекту, контактні дані виконавця, посилання на репо співвиконавців (за необхідністю).
+*студент 2-го курсу, групи ІМ-22*<span padding-right:5em></span> **Олександр БОНДАРЕНКО
+** [Пошта: albom2004q@gmail.com, <a href="https://t.me/Dreammy_Oleksandr">Телеграм</a>]
 
+*студентка 2-го курсу, групи ІМ-22*<span padding-right:5em></span> **Яна КОРОЛЮК
+** [Пошта: yana.koroliuk1@gmail.com, <a href="https://t.me/Koroliuk_Yana">Телеграм</a>]
 
-Шаблон публікування підготовлено з використанням [VuePress](https://vuepress.vuejs.org/), та стартера 
-[FriendlyUser/vuepress-theme-cool-starter](https://github.com/FriendlyUser/vuepress-theme-cool-starter).
+*студент 2-го курсу, групи ІМ-22*<span padding-right:5em></span> **Михайло КОВАЛЕНКО
+** [Пошта: kovalenko10102004@gmail.com, <a href="https://t.me/merrymike">Телеграм</a>]
 
-Щоб опублікувати проект у Github Pages, налаштовуємо Github Pages (гілка ```gh-pages```), змінюємо файл ```./publish.sh```
+*студентка 2-го курсу, групи ІМ-22*<span padding-right:5em></span> **Вікторія САБАДАН
+** [Пошта: victoriasabadan1@gmail.com, <a href="https://t.me/witchkaa">Телеграм</a>]
 
-```sh
+*студент 2-го курсу, групи ІМ-22*<span padding-right:5em></span> **Олег Отіско
+** [Пошта: 9mohapx9@gmail.com, <a href="https://t.me/mibal_ua">Телеграм</a>]
 
-#!/usr/bin/env sh
+**Керівник**
 
-# abort on errors
-set -e
+*доцент кафедри ОТ ФІОТ, к.т.н., доцент*<span padding-right:5em></span> **Андрій БОЛДАК**
 
-# build
-npm run docs:build
+[НТУУ "КИЇВСЬКИЙ ПОЛІТЕХНІЧНИЙ ІНСТИТУТ імені ІГОРЯ СІКОРСЬКОГО](https://kpi.ua/)
 
-# navigate into the build output directory
-cd docs/.vuepress/dist
+[Факультет інформатики та обчислювальної техніки](https://fiot.kpi.ua/)
 
-# if you are deploying to a custom domain
-# echo 'www.example.com' > CNAME
+[Кафедра обчислювальної техніки](https://comsys.kpi.ua/)
 
-git init
-git add -A
-git commit -m 'deploy'
-
-# if you are deploying to https://<USERNAME>.github.io
-# git push -f git@github.com:boldak/<USERNAME>.github.io.git master
-
-# if you are deploying to https://<USERNAME>.github.io/<REPO>
-git push -f https://github.com/<USERNAME>/dis-edu.git master:gh-pages
-
-cd -
-
-```
-
-Потім запускаємо
-
-```bash
-    npm run publish
-```
-
-Для відлагодження документації в локальному режимі запускаємо
-
-```bash
-    npm run docs:dev
-```
-
-Доступ до локально опублікованої версії [http://localhost:3030](http://localhost:3030)
-
-
-## Додаткова інформація
-
-- [Теми проєктів](./guidelines/themes.md)
-- [Методичні вказівки](./guidelines/guidelines.md)
-
-***Happy learning! Happy coding!*** 
+Київ
